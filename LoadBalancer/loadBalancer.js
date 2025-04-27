@@ -3,14 +3,14 @@ import { platform } from 'os';
 import { join } from 'path';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { clear } from 'node:console';
+
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const binaryMap = {
   linux: 'loadbalancer-linux',
   darwin: 'loadbalancer-mac',
-  win32: 'load-balancer-windows-x64 copy.exe'
+  win32: 'load-balancer-windows-x64.exe'
 };
 
 const getBinaryPath = () => {
@@ -52,3 +52,4 @@ export default async function runLoadBalancerWithAsync({ defaultProxy, algorithm
     proc.on('error', reject);
   });
 }
+

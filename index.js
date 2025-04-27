@@ -6,5 +6,5 @@ runLoadBalancerWithAsync({
     backends: [
         { url: 'http://localhost:3001', weight: 3 },
         { url: 'http://localhost:3002', weight: 1 }
-    ]
+    ],
 })
