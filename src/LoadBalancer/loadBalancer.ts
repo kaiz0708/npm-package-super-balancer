@@ -29,26 +29,49 @@ const getBinaryPath = (): string => {
 interface Backend {
   url: string;
   weight: number;
+  healthPath?: string;
 }
+
 
 interface LoadBalancerConfig {
   defaultProxy: string;
   algorithm: string;
   backends: Backend[];
   consecutiveFails?: number,
-  failRate?: number
+  consecutiveSuccess?: number,
+  failRate?: number,
+  timeOutBreak?: number
+}
+
+enum Defaults {
+  ConsecutiveFails = 10,
+  FailRate = 0.5,
+  ConsecutiveSuccess = 10,
+  HealthPathDefault = "",
+  TimeBreakOut = 10
 }
 
 export default async function runLoadBalancerWithAsync(config: LoadBalancerConfig): Promise<number> {
-  if(config.consecutiveFails == null) config.consecutiveFails = 0.2
-  if(config.failRate == null) config.failRate = 0.5
+  if(config.consecutiveFails == undefined) config.consecutiveFails = Defaults.ConsecutiveFails
+  if(config.failRate == undefined) config.failRate = Defaults.FailRate
+  if(config.consecutiveSuccess == undefined) config.consecutiveSuccess = Defaults.ConsecutiveSuccess
+  if(config.timeOutBreak == undefined) config.timeOutBreak = Defaults.TimeBreakOut
+  config.backends.forEach((value, index) => {
+    if(value.healthPath == null){
+      value.healthPath = ""
+    }
+  })
+  console.log(config)
+
   const binary: string = getBinaryPath();
   const args: string[] = [
     `-defaultProxy=${config.defaultProxy}`,
     `-algorithm=${config.algorithm}`,
     `-backends=${JSON.stringify(config.backends)}`,
     `-consecutiveFails=${JSON.stringify(config.consecutiveFails)}`,
-    `-failRate=${JSON.stringify(config.failRate)}`
+    `-failRate=${JSON.stringify(config.failRate)}`,
+    `-consecutiveSuccess=${JSON.stringify(config.consecutiveSuccess)}`,
+    `-timeOutBreak=${JSON.stringify(config.timeOutBreak)}`
   ];
 
   const proc: ChildProcess = spawn(binary, args, {
