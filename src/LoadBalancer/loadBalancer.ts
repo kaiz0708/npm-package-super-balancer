@@ -41,14 +41,16 @@ interface LoadBalancerConfig {
   consecutiveSuccess?: number,
   failRate?: number,
   timeOutBreak?: number
+  timeOutDelay?: number
 }
 
 enum Defaults {
-  ConsecutiveFails = 10,
+  ConsecutiveFails = 50,
   FailRate = 0.5,
-  ConsecutiveSuccess = 10,
+  ConsecutiveSuccess = 50,
   HealthPathDefault = "",
-  TimeBreakOut = 10
+  TimeBreakOut = 50,
+  TimeOutDelay = 5
 }
 
 export default async function runLoadBalancerWithAsync(config: LoadBalancerConfig): Promise<number> {
@@ -56,6 +58,7 @@ export default async function runLoadBalancerWithAsync(config: LoadBalancerConfi
   if(config.failRate == undefined) config.failRate = Defaults.FailRate
   if(config.consecutiveSuccess == undefined) config.consecutiveSuccess = Defaults.ConsecutiveSuccess
   if(config.timeOutBreak == undefined) config.timeOutBreak = Defaults.TimeBreakOut
+  if(config.timeOutDelay == undefined) config.timeOutDelay = Defaults.TimeOutDelay
   config.backends.forEach((value, index) => {
     if(value.healthPath == null){
       value.healthPath = ""
@@ -71,7 +74,8 @@ export default async function runLoadBalancerWithAsync(config: LoadBalancerConfi
     `-consecutiveFails=${JSON.stringify(config.consecutiveFails)}`,
     `-failRate=${JSON.stringify(config.failRate)}`,
     `-consecutiveSuccess=${JSON.stringify(config.consecutiveSuccess)}`,
-    `-timeOutBreak=${JSON.stringify(config.timeOutBreak)}`
+    `-timeOutBreak=${JSON.stringify(config.timeOutBreak)}`,
+    `-timeOutDelay=${JSON.stringify(config.timeOutDelay)}`
   ];
 
   const proc: ChildProcess = spawn(binary, args, {
